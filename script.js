@@ -7,14 +7,14 @@ const pitchLabel = document.getElementById('pitch-label');
 const playButton = document.getElementById('play-button');
 const downloadButton = document.getElementById('download-button');
 
-// Google Translate TTS Supports these languages
+// Languages for playback and download link
 const languages = [
-    { name: 'Bangla (Bangladesh)', code: 'bn' },
-    { name: 'English (US)', code: 'en' },
-    { name: 'Hindi', code: 'hi' },
-    { name: 'Arabic', code: 'ar' },
-    { name: 'Spanish', code: 'es' },
-    { name: 'French', code: 'fr' }
+    { name: 'Bangla (Bangladesh)', code: 'bn-BD', downloadCode: 'bn' },
+    { name: 'English (US)', code: 'en-US', downloadCode: 'en' },
+    { name: 'Hindi', code: 'hi-IN', downloadCode: 'hi' },
+    { name: 'Arabic', code: 'ar-SA', downloadCode: 'ar' },
+    { name: 'Spanish', code: 'es-ES', downloadCode: 'es' },
+    { name: 'French', code: 'fr-FR', downloadCode: 'fr' }
 ];
 
 function populateLanguages() {
@@ -23,33 +23,64 @@ function populateLanguages() {
         const option = document.createElement('option');
         option.textContent = lang.name;
         option.value = lang.code;
+        option.setAttribute('data-download', lang.downloadCode);
         voiceSelect.appendChild(option);
     });
 }
 
 populateLanguages();
 
-let audio = new Audio();
+let synth = window.speechSynthesis;
 
 function speak() {
-    const text = textInput.value.trim();
+    let text = textInput.value.trim();
     if (!text) {
         alert("দয়া করে কিছু টেক্সট লিখুন!");
         return;
     }
 
-    const lang = voiceSelect.value;
-    // Google Translate TTS URL (Secret Hack)
-    // Note: It has a character limit (~200 chars). For longer text, splitting is needed.
-    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
+    // --- Part 1: Play with SpeechSynthesis API ---
+    if (synth.speaking) {
+        synth.cancel();
+    }
 
-    audio.src = ttsUrl;
-    audio.play();
+    // Clean text for SpeechSynthesis (remove newlines for smoother reading)
+    const cleanText = text.replace(/\n/g, ' ');
 
-    // Prepare download link
-    downloadButton.href = ttsUrl;
-    downloadButton.target = "_blank"; // Open in new tab if direct download is blocked
-    downloadButton.setAttribute('download', 'sohag-tts-voice.mp3');
+    const utterThis = new SpeechSynthesisUtterance(cleanText);
+    utterThis.lang = voiceSelect.value;
+    utterThis.rate = parseFloat(rate.value);
+    utterThis.pitch = parseFloat(pitch.value);
+
+    // Error handling for playback
+    utterThis.onerror = (event) => {
+        console.error("SpeechSynthesis Error:", event);
+        alert("প্লে করতে সমস্যা হচ্ছে। ব্রাউজারটি রিফ্রেশ করে আবার চেষ্টা করুন।");
+    };
+
+    synth.speak(utterThis);
+
+    // --- Part 2: Prepare Download Link (with 200 char limit check) ---
+    const downloadLang = voiceSelect.selectedOptions[0].getAttribute('data-download');
+    
+    // Google TTS has a 200 character limit for the free link.
+    // If text is longer, we warn the user.
+    if (text.length > 200) {
+        downloadButton.onclick = (e) => {
+            e.preventDefault();
+            alert("দুঃখিত! গুগলের ফ্রি সার্ভিস থেকে একবারে ২০০ অক্ষরের বেশি ডাউনলোড করা সম্ভব নয়। দয়া করে ছোট টেক্সট দিয়ে চেষ্টা করুন।");
+        };
+        downloadButton.href = "#";
+    } else {
+        // Clean text for URL (remove special characters that might cause malformed request)
+        const urlText = encodeURIComponent(text.replace(/\n/g, ' '));
+        const downloadUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${downloadLang}&client=tw-ob&q=${urlText}`;
+        
+        downloadButton.onclick = null; // Remove the alert if text is small enough
+        downloadButton.href = downloadUrl;
+        downloadButton.target = "_blank";
+        downloadButton.setAttribute('download', 'sohag-tts-voice.mp3');
+    }
 }
 
 playButton.addEventListener('click', (event) => {
@@ -63,13 +94,10 @@ downloadButton.addEventListener('click', (event) => {
         event.preventDefault();
         alert('আগে কিছু টেক্সট লিখে "Play Audio" বাটনে ক্লিক করুন।');
     }
-    // Note: Some browsers might block cross-origin downloads from translate.google.com
-    // In that case, the link will open in a new tab where user can right-click to save.
 });
 
 rate.addEventListener('input', () => {
     rateLabel.textContent = rate.value;
-    // Note: Google Translate TTS doesn't support pitch/rate change via URL parameter easily
 });
 
 pitch.addEventListener('input', () => {
