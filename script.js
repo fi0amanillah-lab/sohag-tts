@@ -8,6 +8,13 @@ const pitchLabel = document.getElementById('pitch-label');
 const processButton = document.getElementById('process-button');
 const cardsContainer = document.getElementById('cards-container');
 
+console.log("Sohag Smart TTS Initialized...");
+
+// Check if SpeechSynthesis is supported
+if (!window.speechSynthesis) {
+    alert("দুঃখিত! আপনার ব্রাউজারে ভয়েস সাপোর্ট নেই। দয়া করে ক্রোম বা অন্য আধুনিক ব্রাউজার ব্যবহার করুন।");
+}
+
 // Languages for playback and download link
 const languages = [
     { name: 'Bangla (Bangladesh)', code: 'bn-BD', downloadCode: 'bn' },
@@ -81,12 +88,23 @@ function createCard(chunk, index) {
     `;
 
     // Play functionality for this specific card
-    card.querySelector('.play-card-btn').addEventListener('click', () => {
-        if (synth.speaking) synth.cancel();
+    card.querySelector('.play-card-btn').addEventListener('click', function() {
+        console.log("Playing block #" + (index + 1));
+        
+        if (synth.speaking) {
+            console.log("Cancelling previous speech...");
+            synth.cancel();
+        }
+
         const utterThis = new SpeechSynthesisUtterance(chunk);
         utterThis.lang = voiceSelect.value;
         utterThis.rate = parseFloat(rate.value);
         utterThis.pitch = parseFloat(pitch.value);
+
+        utterThis.onstart = () => console.log("Speech started...");
+        utterThis.onend = () => console.log("Speech ended.");
+        utterThis.onerror = (e) => console.error("Speech error:", e);
+
         synth.speak(utterThis);
     });
 
@@ -94,13 +112,17 @@ function createCard(chunk, index) {
 }
 
 processButton.addEventListener('click', () => {
+    console.log("Process button clicked...");
     const text = textInput.value.trim();
     if (!text) {
         alert("দয়া করে কিছু টেক্সট লিখুন!");
         return;
     }
 
+    console.log("Splitting text into blocks...");
     const chunks = splitText(text);
+    console.log("Total blocks generated:", chunks.length);
+
     cardsContainer.innerHTML = ''; // Clear previous cards
     
     chunks.forEach((chunk, index) => {
@@ -108,8 +130,12 @@ processButton.addEventListener('click', () => {
         cardsContainer.appendChild(card);
     });
 
+    console.log("Cards rendered successfully.");
+
     // Smooth scroll to results
-    cardsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (cardsContainer.firstChild) {
+        cardsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 });
 
 rate.addEventListener('input', () => {
