@@ -12,27 +12,31 @@
     <div class="w-full max-w-4xl mx-auto p-4 md:p-8">
         
         <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-[#D4AF37] tracking-wider">Sohag TTS</h1>
-            <p class="text-lg text-gray-400 mt-2">Your Premium Web-Based Voice Engine</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-[#D4AF37] tracking-wider">Sohag Smart TTS</h1>
+            <p class="text-lg text-gray-400 mt-2">Intelligent Multi-Block Voice Engine</p>
         </header>
 
-        <main class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <main class="space-y-8">
 
-            <!-- Left Column: Text Input -->
-            <div class="md:col-span-2 bg-[#1A1A1A] p-6 rounded-lg border border-gray-700">
-                <h2 class="text-2xl font-semibold mb-4 text-[#D4AF37]">Enter Your Text</h2>
-                <textarea id="text-input" class="w-full h-64 bg-[#0F0F0F] text-white p-4 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]" placeholder="এখানে আপনার টেক্সট লিখুন..."></textarea>
-            </div>
+            <!-- Top Section: Input & Controls -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Left Column: Text Input -->
+                <div class="md:col-span-2 bg-[#1A1A1A] p-6 rounded-lg border border-gray-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold text-[#D4AF37]">Enter Your Text</h2>
+                        <span id="char-count" class="text-sm text-gray-500">0 chars</span>
+                    </div>
+                    <textarea id="text-input" class="w-full h-48 bg-[#0F0F0F] text-white p-4 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]" placeholder="এখানে আপনার বড় অনুচ্ছেদ পেস্ট করুন..."></textarea>
+                </div>
 
-            <!-- Right Column: Controls -->
-            <div class="bg-[#1A1A1A] p-6 rounded-lg border border-gray-700 flex flex-col justify-between">
-                <div>
-                    <h2 class="text-2xl font-semibold mb-4 text-[#D4AF37]">Controls</h2>
+                <!-- Right Column: Global Controls -->
+                <div class="bg-[#1A1A1A] p-6 rounded-lg border border-gray-700 flex flex-col">
+                    <h2 class="text-2xl font-semibold mb-4 text-[#D4AF37]">Global Settings</h2>
                     
                     <div class="mb-4">
-                        <label for="voice-select" class="block mb-2 text-sm font-medium text-gray-300">Select Voice</label>
+                        <label for="voice-select" class="block mb-2 text-sm font-medium text-gray-300">Select Language</label>
                         <select id="voice-select" class="w-full bg-[#0F0F0F] border border-gray-600 text-white text-sm rounded-lg focus:ring-[#D4AF37] focus:border-[#D4AF37] p-2.5">
-                            <option selected>Loading voices...</option>
+                            <!-- Languages populated by JS -->
                         </select>
                     </div>
 
@@ -46,16 +50,18 @@
                             <input type="range" id="pitch" min="0" max="2" value="1" step="0.1" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#D4AF37]">
                         </div>
                     </div>
-                </div>
 
-                <div class="mt-6 space-y-3">
-                    <button id="play-button" class="w-full text-black bg-[#D4AF37] font-bold py-3 px-4 rounded-lg glowing-button">
-                        Play Audio
-                    </button>
-                    <a id="download-button" href="#" class="w-full text-[#D4AF37] bg-transparent border border-[#D4AF37] font-bold py-3 px-4 rounded-lg hover:bg-[#D4AF37] hover:text-black transition-colors duration-300 text-center block">
-                        Download MP3
-                    </a>
+                    <div class="mt-auto pt-6">
+                        <button id="process-button" class="w-full text-black bg-[#D4AF37] font-bold py-3 px-4 rounded-lg glowing-button">
+                            Process Text Blocks
+                        </button>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Bottom Section: Smart Cards Container -->
+            <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Smart Cards will be generated here -->
             </div>
         </main>
     </div>
